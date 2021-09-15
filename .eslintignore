@@ -1,6 +1,1 @@
-node_modules
-dist
-coverage
-jest.config.ts
-.eslintrc.js
-test
+build/

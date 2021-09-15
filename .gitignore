@@ -2,3 +2,9 @@ dist
 node_modules
 .idea
 coverage
+.DS_Store
+.vscode/
+*.log
+build/
+output/
+.nyc*
