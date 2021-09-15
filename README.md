@@ -1,23 +1,13 @@
-<p align="center">
-  <img src="https://app.1inch.io/assets/images/logo.svg" width="200" alt="1inch network" />
-</p>
+# ts-multicall
 
-# Multicall
-
-### This is the package for high-weight optimized calls to blockchain nodes
+> a fork of @1inch/multicall that utilizes ES Modules and more modern javasscript
 
 ## Installation
 
 ### Node
 
 ```
-npm install @1inch/multicall
-```
-
-### Yarn
-
-```
-yarn install @1inch/multicall
+npm install ts-multicall
 ```
 
 ## Onchain addresses
