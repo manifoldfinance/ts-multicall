@@ -1,0 +1,389 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>ts-multicall</title>
+	<meta name="description" content="Documentation for ts-multicall">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">ts-multicall</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>ts-multicall</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#ts-multicall" id="ts-multicall" style="color: inherit; text-decoration: none;">
+					<h1>ts-multicall</h1>
+				</a>
+				<blockquote>
+					<p>a fork of @1inch/multicall that utilizes ES Modules and more modern javasscript</p>
+				</blockquote>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h2>Installation</h2>
+				</a>
+				<a href="#node" id="node" style="color: inherit; text-decoration: none;">
+					<h3>Node</h3>
+				</a>
+				<pre><code>npm <span class="hljs-keyword">install</span> ts-multicall
+</code></pre>
+				<a href="#onchain-addresses" id="onchain-addresses" style="color: inherit; text-decoration: none;">
+					<h2>Onchain addresses</h2>
+				</a>
+				<ul>
+					<li>Ethereum mainnet: <code>0x8d035edd8e09c3283463dade67cc0d49d6868063</code></li>
+					<li>BSC mainnet: <code>0x804708de7af615085203fa2b18eae59c5738e2a9</code></li>
+					<li>Polygon mainnet: <code>0x59a0A6d73e6a5224871f45E6d845ce1574063ADe</code></li>
+				</ul>
+				<a href="#motivation" id="motivation" style="color: inherit; text-decoration: none;">
+					<h2>Motivation</h2>
+				</a>
+				<p>The <strong>MultiCall</strong> contract is designed to execute multiple view calls at one
+					time.<br>For example, you have a list of tokens, and you need to get balances for all the
+				items on that list.</p>
+				<p>Let&#39;s try to do it in the most obvious way:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> provider = <span class="hljs-keyword">new</span> Web3ProviderConnector(<span class="hljs-keyword">new</span> Web3(<span class="hljs-string">&#x27;...&#x27;</span>));
+<span class="hljs-keyword">const</span> walletAddress = <span class="hljs-string">&#x27;0x1111111111111111111111111111111111111111&#x27;</span>;
+
+<span class="hljs-keyword">const</span> tokens = [
+  <span class="hljs-string">&#x27;0x6b175474e89094c44da98b954eedeac495271d0f&#x27;</span>,
+  <span class="hljs-string">&#x27;0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&#x27;</span>,
+  <span class="hljs-string">&#x27;0xdac17f958d2ee523a2206206994597c13d831ec7&#x27;</span>,
+];
+
+<span class="hljs-keyword">const</span> contractCalls = tokens.map(<span class="hljs-function">(<span class="hljs-params">tokenAddress</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> callData = provider.contractEncodeABI(
+    ERC20ABI,
+    tokenAddress,
+    <span class="hljs-string">&#x27;balanceOf&#x27;</span>,
+    [walletAddress],
+  );
+
+  <span class="hljs-keyword">return</span> provider.ethCall(tokenAddress, callData);
+});
+
+<span class="hljs-keyword">const</span> balances = <span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.all(contractCalls);
+</code></pre>
+				<p>The downside to this solution is that you make as many requests for a contract
+					as you have tokens on the list.<br>And if the list is large enough, you will create a significant load on the
+				provider.</p>
+				<a href="#simple-multicall" id="simple-multicall" style="color: inherit; text-decoration: none;">
+					<h3>Simple MultiCall</h3>
+				</a>
+				<p>A <strong>multiCallService.callByChunks()</strong> contract takes a list of requests, splits
+				them into chunks and calls the provider in batches.</p>
+				<a href="#default-params" id="default-params" style="color: inherit; text-decoration: none;">
+					<h4>Default params</h4>
+				</a>
+				<ul>
+					<li>maxChunkSize: <strong>100</strong></li>
+					<li>retriesLimit: <strong>3</strong></li>
+					<li>blockNumber: <strong>&#39;latest&#39;</strong></li>
+				</ul>
+				<p>Example:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> provider = <span class="hljs-keyword">new</span> Web3ProviderConnector(<span class="hljs-keyword">new</span> Web3(<span class="hljs-string">&#x27;...&#x27;</span>));
+<span class="hljs-keyword">const</span> walletAddress = <span class="hljs-string">&#x27;0x1111111111111111111111111111111111111111&#x27;</span>;
+<span class="hljs-keyword">const</span> contractAddress = <span class="hljs-string">&#x27;0x8d035edd8e09c3283463dade67cc0d49d6868063&#x27;</span>;
+<span class="hljs-keyword">const</span> multiCallService = <span class="hljs-keyword">new</span> MultiCallService(provider, contractAddress);
+
+<span class="hljs-keyword">const</span> tokens = [
+  <span class="hljs-string">&#x27;0x6b175474e89094c44da98b954eedeac495271d0f&#x27;</span>,
+  <span class="hljs-string">&#x27;0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&#x27;</span>,
+  <span class="hljs-string">&#x27;0xdac17f958d2ee523a2206206994597c13d831ec7&#x27;</span>,
+];
+
+<span class="hljs-comment">// The parameters are optional, if not specified, the default will be used</span>
+<span class="hljs-keyword">const</span> params: MultiCallParams = {
+  <span class="hljs-attr">chunkSize</span>: <span class="hljs-number">100</span>,
+  <span class="hljs-attr">retriesLimit</span>: <span class="hljs-number">3</span>,
+  <span class="hljs-attr">blockNumber</span>: <span class="hljs-string">&#x27;latest&#x27;</span>,
+};
+
+<span class="hljs-keyword">const</span> callDatas = tokens.map(<span class="hljs-function">(<span class="hljs-params">tokenAddress</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">to</span>: tokenAddress,
+    <span class="hljs-attr">data</span>: provider.contractEncodeABI(ERC20ABI, tokenAddress, <span class="hljs-string">&#x27;balanceOf&#x27;</span>, [
+      walletAddress,
+    ]),
+  };
+});
+
+<span class="hljs-keyword">const</span> balances = <span class="hljs-keyword">await</span> multiCallService.callByChunks(callDatas, params);
+</code></pre>
+				<p>Got better! Instead of making a separate request to the provider for each item,
+				we group them into butches and make much fewer requests.</p>
+				<blockquote>
+					<p>Note: If the call to this method exceeds the gas limit, then the entire
+					request will be reverted.</p>
+				</blockquote>
+				<a href="#multicall-by-gas-limit" id="multicall-by-gas-limit" style="color: inherit; text-decoration: none;">
+					<h3>MultiCall by gas limit</h3>
+				</a>
+				<p><strong>Problem:</strong><br>The point is that the node has a limit for gas per call of the contract.<br>And it may happen that by making a simple MultiCall we will not meet this
+					limit.<br>If the gas limit on the node is large enough, we may face a time limit on the
+				execution of the contract method.</p>
+				<p>In total, <strong>there are 2 restrictions on a node:</strong></p>
+				<ul>
+					<li>by gas</li>
+					<li>by time</li>
+				</ul>
+				<p>To avoid these limitations, there is a more advanced method:<br><strong>multiCallService.callByGasLimit()</strong></p>
+				<a href="#default-params-1" id="default-params-1" style="color: inherit; text-decoration: none;">
+					<h4>Default params</h4>
+				</a>
+				<ul>
+					<li>maxChunkSize: <strong>500</strong></li>
+					<li>retriesLimit: <strong>3</strong></li>
+					<li>blockNumber: <strong>&#39;latest&#39;</strong></li>
+					<li>gasBuffer: <strong>3000000</strong></li>
+					<li>maxGasLimit: <strong>150000000</strong></li>
+				</ul>
+				<p>Example:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> contractAddress = <span class="hljs-string">&#x27;0x8d035edd8e09c3283463dade67cc0d49d6868063&#x27;</span>;
+<span class="hljs-keyword">const</span> provider = <span class="hljs-keyword">new</span> Web3ProviderConnector(<span class="hljs-keyword">new</span> Web3(<span class="hljs-string">&#x27;...&#x27;</span>));
+
+<span class="hljs-keyword">const</span> gasLimitService = <span class="hljs-keyword">new</span> GasLimitService(provider, contractAddress);
+<span class="hljs-keyword">const</span> multiCallService = <span class="hljs-keyword">new</span> MultiCallService(provider, contractAddress);
+
+<span class="hljs-keyword">const</span> balanceOfGasUsage = <span class="hljs-number">30_000</span>;
+
+<span class="hljs-keyword">const</span> tokens = [
+  <span class="hljs-string">&#x27;0x6b175474e89094c44da98b954eedeac495271d0f&#x27;</span>,
+  <span class="hljs-string">&#x27;0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&#x27;</span>,
+  <span class="hljs-string">&#x27;0xdac17f958d2ee523a2206206994597c13d831ec7&#x27;</span>,
+];
+
+<span class="hljs-keyword">const</span> requests: MultiCallRequest[] = tokens.map(<span class="hljs-function">(<span class="hljs-params">tokenAddress</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">to</span>: tokenAddress,
+    <span class="hljs-attr">data</span>: provider.contractEncodeABI(ERC20ABI, tokenAddress, <span class="hljs-string">&#x27;balanceOf&#x27;</span>, [
+      walletAddress,
+    ]),
+    <span class="hljs-attr">gas</span>: balanceOfGasUsage,
+  };
+});
+
+<span class="hljs-keyword">const</span> gasLimit: <span class="hljs-built_in">number</span> = <span class="hljs-keyword">await</span> gasLimitService.calculateGasLimit();
+
+<span class="hljs-comment">// The parameters are optional, if not specified, the default will be used</span>
+<span class="hljs-keyword">const</span> params: MultiCallParams = {
+  <span class="hljs-attr">maxChunkSize</span>: <span class="hljs-number">500</span>,
+  <span class="hljs-attr">retriesLimit</span>: <span class="hljs-number">3</span>,
+  <span class="hljs-attr">blockNumber</span>: <span class="hljs-string">&#x27;latest&#x27;</span>,
+  <span class="hljs-attr">gasBuffer</span>: <span class="hljs-number">100_000</span>,
+};
+
+<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> multiCallService.callByGasLimit(
+  requests,
+  gasLimit,
+  params,
+);
+</code></pre>
+				<p>The idea is that we request the gas limit from the node and split the requests
+				into chunks regarding this limit.<br>Accordingly, we must set the gas limit for each request.</p>
+				<blockquote>
+					<p>It is noteworthy that if suddenly the request does not fit into the gas limit,
+						the entire request will not be reverted, and the request will return the
+					results of those calls that fit into the gas limit.</p>
+				</blockquote>
+				<p>If the call to the contract all the same does not fit into the gas limit, then
+					the callByGasLimit() will automatically re-request those elements that have not
+				been fulfilled.</p>
+				<p><strong>You can see a more detailed description of the library&#39;s work in the diagrams
+				below.</strong></p>
+				<a href="#gaslimitservice" id="gaslimitservice" style="color: inherit; text-decoration: none;">
+					<h3>GasLimitService</h3>
+				</a>
+				<p>This service is used to correctly calculate the gas limit for calling a
+				MultiCall.<br>The basic formula for calculating the limit is as follows:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> gasLimitForMultiCall =
+  <span class="hljs-built_in">Math</span>.min(gasLimitFromNode, maxGasLimit) - gasBuffer;
+</code></pre>
+				<p>Where:<br><code>gasLimitFromNode</code> - is the gas limit taken from the node<br><code>maxGasLimit</code> - limiter on top, in case the gas limit from the node is too large
+					(may cause timeout)<br><code>gasBuffer</code> - is some safe buffer that allows you to avoid crossing the limit in
+				case of unforeseen situations</p>
+				<p>Example:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> gasLimitForMultiCall = <span class="hljs-built_in">Math</span>.min(<span class="hljs-number">12_000_000</span>, <span class="hljs-number">40_000_000</span>) - <span class="hljs-number">100_000</span>; <span class="hljs-comment">// 11_990_000</span>
+</code></pre>
+				<p>We believe that the multicall call should fit into 11_990_000 gas.</p>
+				<a href="#default-params-2" id="default-params-2" style="color: inherit; text-decoration: none;">
+					<h4>Default params:</h4>
+				</a>
+				<ul>
+					<li>gasBuffer: <strong>3000000</strong></li>
+					<li>maxGasLimit: <strong>150000000</strong></li>
+				</ul>
+				<p>Params for <code>GasLimitService.calculateGasLimit()</code> are optional, if not specified,
+					then gas limit will be requested from the node and the default params will be
+				used.</p>
+				<p>Example:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> contractAddress = <span class="hljs-string">&#x27;0x8d035edd8e09c3283463dade67cc0d49d6868063&#x27;</span>;
+<span class="hljs-keyword">const</span> provider = <span class="hljs-keyword">new</span> Web3ProviderConnector(<span class="hljs-keyword">new</span> Web3(<span class="hljs-string">&#x27;...&#x27;</span>));
+
+<span class="hljs-keyword">const</span> gasLimitService = <span class="hljs-keyword">new</span> GasLimitService(provider, contractAddress);
+
+<span class="hljs-keyword">const</span> gasLimit: <span class="hljs-built_in">number</span> = <span class="hljs-keyword">await</span> gasLimitService.calculateGasLimit();
+</code></pre>
+				<p>Alternatively, you can specify your own parameters:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> contractAddress = <span class="hljs-string">&#x27;0x8d035edd8e09c3283463dade67cc0d49d6868063&#x27;</span>;
+<span class="hljs-keyword">const</span> provider = <span class="hljs-keyword">new</span> Web3ProviderConnector(<span class="hljs-keyword">new</span> Web3(<span class="hljs-string">&#x27;...&#x27;</span>));
+
+<span class="hljs-keyword">const</span> gasLimitService = <span class="hljs-keyword">new</span> GasLimitService(provider, contractAddress);
+
+<span class="hljs-comment">// 190_000</span>
+<span class="hljs-keyword">const</span> gasLimit: <span class="hljs-built_in">number</span> = <span class="hljs-keyword">await</span> gasLimitService.calculateGasLimit({
+  <span class="hljs-attr">gasLimit</span>: <span class="hljs-number">200_000</span>,
+  <span class="hljs-attr">maxGasLimit</span>: <span class="hljs-number">200_000</span>,
+  <span class="hljs-attr">gasBuffer</span>: <span class="hljs-number">10_000</span>,
+});
+</code></pre>
+				<a href="#contract-code" id="contract-code" style="color: inherit; text-decoration: none;">
+					<h2><a href="https://etherscan.io/address/0x8d035edd8e09c3283463dade67cc0d49d6868063#code">Contract code</a></h2>
+				</a>
+				<hr>
+				<a href="#algorithm-activity-diagram" id="algorithm-activity-diagram" style="color: inherit; text-decoration: none;">
+					<h2>Algorithm activity diagram</h2>
+				</a>
+				<p><img src="http://www.plantuml.com/plantuml/png/XLJRJkCm47tFLup4Gni9GG3naZnKNPQzI2kqegpsOLb5RZ8b5ecTjHtQGlllEqwTIszWgHTdncVEd3dnQcAOCYjFsnylXE-Yh0oapB0GtZm0KFYlGcrq27_ibjQRaI4CWaKG34vTPhsxeEqJeyIB80ZMfnzaNpRPb_tiixCp--zllQVm3rvmGuZNGKnfzbD7IgPOeHr3kmgskCagyJpXhnZ2jKk3chzH71kWg_RvD9V9yrrLJ54HevmPQdBGHgdqfsesix6he5usieRpSsyTaKpZD0KkKbo0aO0ioLgTW1iiTEIj9cNE3IIMbLvv2ajafeOdyeORBWNKAN5pCfukuqrwrnTipa5uswiHjL4-W-6Z-49rk20YzMcOBYrzo6t7ZmB6TvzXHXdqU1FNfD7eKVXWCXGmNABslHOHSuqm5D9lduIJEJTKdF05Bbn77GKKAP_jqfrdF2UORqIZFkE8ZtoYh3SbGKZJ5Lfxgzi59fN1Lh5jgLpK2JJa8hOUo7FC_MDgxH1z3o-c5hFOMQM7juixDZJSqbWj4YeEYHH6iSH4UoUQwOmLMfs1RKvga2-eHblQmv5rKdBn73vaIiu1bP8gEfggZImFH_VdkHMrmpjyyAHaEJufH17Uz5k50aqcKnWKLMwuLU4tQVVLlQhCYZk8ZWdeV76FkfI2Y94PT9KagFMioaaLQmxYkl76dZZhZsnM3zF1x7kiDlED50bhNal0sWL4MHEafePqrDZnfvAMLvVYCbPUJva9Uq6NWMa3wf1WoCgI1BPcAHM-S5bfF_AydYlespBS0TXtHtYFQPNWrYrdt-UCvMvw5lGEvziP9CChAddORU-ugtDJpn_XBtsGBTqmjVppzWQClCvq3i3R7bZNFXDBAAJLeGSmyhrm8fLfbQHMwyiM2Rkd_ZsQIebkSbJiFm00" alt="approve"></p>
+				<hr>
+				<a href="#algorithm-visualization" id="algorithm-visualization" style="color: inherit; text-decoration: none;">
+					<h2>Algorithm visualization</h2>
+				</a>
+				<p><img src="./docs/img/multicall_with_gas.png" alt=""></p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Internals</span>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_connector_index_.html">&quot;src/connector/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_connector_provider_connector_.html">&quot;src/connector/provider.connector&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_connector_web3_provider_connector_.html">&quot;src/connector/web3-<wbr>provider.connector&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_gas_limit_service_.html">&quot;src/gas-<wbr>limit.service&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_index_.html">&quot;src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_model_abi_model_.html">&quot;src/model/abi.model&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_model_index_.html">&quot;src/model/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_model_multicall_model_.html">&quot;src/model/multicall.model&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_multicall_const_.html">&quot;src/multicall.const&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_multicall_helpers_.html">&quot;src/multicall.helpers&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_multicall_service_.html">&quot;src/multicall.service&quot;</a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Externals</span>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_src_abi_multicall_abi_.html">&quot;src/abi/<wbr>Multi<wbr>Call.abi&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
